@@ -1,0 +1,105 @@
+{
+	"_copyright": "Copyright (C) 2012 - 2013, Digium, Inc.",
+	"_author": "David M. Lee, II <dlee@digium.com>",
+	"_svn_revision": "$Revision: 401312 $",
+	"apiVersion": "0.0.0-test",
+	"swaggerVersion": "1.1",
+	"basePath": "http://ari.py/ari",
+	"resourcePath": "/api-docs/endpoints.{format}",
+	"apis": [
+		{
+			"path": "/endpoints",
+			"description": "Asterisk endpoints",
+			"operations": [
+				{
+					"httpMethod": "GET",
+					"summary": "List all endpoints.",
+					"nickname": "list",
+					"responseClass": "List[Endpoint]"
+				}
+			]
+		},
+		{
+			"path": "/endpoints/{tech}",
+			"description": "Asterisk endpoints",
+			"operations": [
+				{
+					"httpMethod": "GET",
+					"summary": "List available endoints for a given endpoint technology.",
+					"nickname": "listByTech",
+					"responseClass": "List[Endpoint]",
+					"parameters": [
+						{
+							"name": "tech",
+							"description": "Technology of the endpoints (sip,iax2,...)",
+							"paramType": "path",
+							"dataType": "string"
+						}
+					]
+				}
+			]
+		},
+		{
+			"path": "/endpoints/{tech}/{resource}",
+			"description": "Single endpoint",
+			"operations": [
+				{
+					"httpMethod": "GET",
+					"summary": "Details for an endpoint.",
+					"nickname": "get",
+					"responseClass": "Endpoint",
+					"parameters": [
+						{
+							"name": "tech",
+							"description": "Technology of the endpoint",
+							"paramType": "path",
+							"dataType": "string"
+						},
+						{
+							"name": "resource",
+							"description": "ID of the endpoint",
+							"paramType": "path",
+							"dataType": "string"
+						}
+					]
+				}
+			]
+		}
+	],
+	"models": {
+		"Endpoint": {
+			"id": "Endpoint",
+			"description": "An external device that may offer/accept calls to/from Asterisk.\n\nUnlike most resources, which have a single unique identifier, an endpoint is uniquely identified by the technology/resource pair.",
+			"properties": {
+				"technology": {
+					"type": "string",
+					"description": "Technology of the endpoint",
+					"required": true
+				},
+				"resource": {
+					"type": "string",
+					"description": "Identifier of the endpoint, specific to the given technology.",
+					"required": true
+				},
+				"state": {
+					"type": "string",
+					"description": "Endpoint's state",
+					"required": false,
+					"allowableValues": {
+						"valueType": "LIST",
+						"values": [
+							"unknown",
+							"offline",
+							"online"
+						]
+					}
+				},
+				"channel_ids": {
+					"type": "List[string]",
+					"description": "Id's of channels associated with this endpoint",
+					"required": true
+				}
+			}
+		}
+	}
+}

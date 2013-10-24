@@ -1,0 +1,385 @@
+{
+	"_copyright": "Copyright (C) 2012 - 2013, Digium, Inc.",
+	"_author": "David M. Lee, II <dlee@digium.com>",
+	"_svn_revision": "$Revision: 400522 $",
+	"apiVersion": "0.0.0-test",
+	"swaggerVersion": "1.3",
+	"basePath": "http://ari.py/ari",
+	"resourcePath": "/api-docs/events.{format}",
+	"apis": [
+		{
+			"path": "/events",
+			"description": "Events from Asterisk to applications",
+			"operations": [
+				{
+					"httpMethod": "GET",
+					"upgrade": "websocket",
+					"websocketProtocol": "ari",
+					"summary": "WebSocket connection for events.",
+					"nickname": "eventWebsocket",
+					"responseClass": "Message",
+					"parameters": [
+						{
+							"name": "app",
+							"description": "Applications to subscribe to.",
+							"paramType": "query",
+							"required": true,
+							"allowMultiple": true,
+							"dataType": "string"
+						}
+					]
+				}
+			]
+		}
+	],
+	"models": {
+		"Message": {
+			"id": "Message",
+			"description": "Base type for errors and events",
+			"discriminator": "type",
+			"properties": {
+				"type": {
+					"type": "string",
+					"required": true,
+					"description": "Indicates the type of this message."
+				}
+			}
+		},
+		"MissingParams": {
+			"id": "MissingParams",
+			"extends": "Message",
+			"description": "Error event sent when required params are missing.",
+			"properties": {
+				"params": {
+					"required": true,
+					"type": "List[string]",
+					"description": "A list of the missing parameters"
+				}
+			}
+		},
+		"Event": {
+			"id": "Event",
+			"extends": "Message",
+			"description": "Base type for asynchronous events from Asterisk.",
+			"properties": {
+				"application": {
+					"type": "string",
+					"description": "Name of the application receiving the event.",
+					"required": true
+				},
+				"timestamp": {
+					"type": "Date",
+					"description": "Time at which this event was created.",
+					"required": false
+				}
+			}
+		},
+		"PlaybackStarted": {
+			"id": "PlaybackStarted",
+			"extends": "Event",
+			"description": "Event showing the start of a media playback operation.",
+			"properties": {
+				"playback": {
+					"type": "Playback",
+					"description": "Playback control object",
+					"required": true
+				}
+			}
+		},
+		"PlaybackFinished": {
+			"id": "PlaybackFinished",
+			"extends": "Event",
+			"description": "Event showing the completion of a media playback operation.",
+			"properties": {
+				"playback": {
+					"type": "Playback",
+					"description": "Playback control object",
+					"required": true
+				}
+			}
+		},
+		"ApplicationReplaced": {
+			"id": "ApplicationReplaced",
+			"extends": "Event",
+			"description": "Notification that another WebSocket has taken over for an application.\n\nAn application may only be subscribed to by a single WebSocket at a time. If multiple WebSockets attempt to subscribe to the same application, the newer WebSocket wins, and the older one receives this event.",
+			"properties": {}
+		},
+		"BridgeCreated": {
+			"id": "BridgeCreated",
+			"extends": "Event",
+			"description": "Notification that a bridge has been created.",
+			"properties": {
+				"bridge": {
+					"required": true,
+					"type": "Bridge"
+				}
+			}
+		},
+		"BridgeDestroyed": {
+			"id": "BridgeDestroyed",
+			"extends": "Event",
+			"description": "Notification that a bridge has been destroyed.",
+			"properties": {
+				"bridge": {
+					"required": true,
+					"type": "Bridge"
+				}
+			}
+		},
+		"BridgeMerged": {
+			"id": "BridgeMerged",
+			"extends": "Event",
+			"description": "Notification that one bridge has merged into another.",
+			"properties": {
+				"bridge": {
+					"required": true,
+					"type": "Bridge"
+				},
+				"bridge_from": {
+					"required": true,
+					"type": "Bridge"
+				}
+			}
+		},
+		"ChannelCreated": {
+			"id": "ChannelCreated",
+			"extends": "Event",
+			"description": "Notification that a channel has been created.",
+			"properties": {
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		},
+		"ChannelDestroyed": {
+			"id": "ChannelDestroyed",
+			"extends": "Event",
+			"description": "Notification that a channel has been destroyed.",
+			"properties": {
+				"cause": {
+					"required": true,
+					"description": "Integer representation of the cause of the hangup",
+					"type": "int"
+				},
+				"cause_txt": {
+					"required": true,
+					"description": "Text representation of the cause of the hangup",
+					"type": "string"
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		},
+		"ChannelEnteredBridge": {
+			"id": "ChannelEnteredBridge",
+			"extends": "Event",
+			"description": "Notification that a channel has entered a bridge.",
+			"properties": {
+				"bridge": {
+					"required": true,
+					"type": "Bridge"
+				},
+				"channel": {
+					"type": "Channel"
+				}
+			}
+		},
+		"ChannelLeftBridge": {
+			"id": "ChannelLeftBridge",
+			"extends": "Event",
+			"description": "Notification that a channel has left a bridge.",
+			"properties": {
+				"bridge": {
+					"required": true,
+					"type": "Bridge"
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		},
+		"ChannelStateChange": {
+			"id": "ChannelStateChange",
+			"extends": "Event",
+			"description": "Notification of a channel's state change.",
+			"properties": {
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		},
+		"ChannelDtmfReceived": {
+			"id": "ChannelDtmfReceived",
+			"extends": "Event",
+			"description": "DTMF received on a channel.\n\nThis event is sent when the DTMF ends. There is no notification about the start of DTMF",
+			"properties": {
+				"digit": {
+					"required": true,
+					"type": "string",
+					"description": "DTMF digit received (0-9, A-E, # or *)"
+				},
+				"duration_ms": {
+					"required": true,
+					"type": "int",
+					"description": "Number of milliseconds DTMF was received"
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel",
+					"description": "The channel on which DTMF was received"
+				}
+			}
+		},
+		"ChannelDialplan": {
+			"id": "ChannelDialplan",
+			"extends": "Event",
+			"description": "Channel changed location in the dialplan.",
+			"properties": {
+				"channel": {
+					"required": true,
+					"type": "Channel",
+					"description": "The channel that changed dialplan location."
+				},
+				"dialplan_app": {
+					"required": true,
+					"type": "string",
+					"description": "The application about to be executed."
+				},
+				"dialplan_app_data": {
+					"required": true,
+					"type": "string",
+					"description": "The data to be passed to the application."
+				}
+			}
+		},
+		"ChannelCallerId": {
+			"id": "ChannelCallerId",
+			"extends": "Event",
+			"description": "Channel changed Caller ID.",
+			"properties": {
+				"caller_presentation": {
+					"required": true,
+					"type": "int",
+					"description": "The integer representation of the Caller Presentation value."
+				},
+				"caller_presentation_txt": {
+					"required": true,
+					"type": "string",
+					"description": "The text representation of the Caller Presentation value."
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel",
+					"description": "The channel that changed Caller ID."
+				}
+			}
+		},
+		"ChannelUserevent": {
+			"id": "ChannelUserevent",
+			"extends": "Event",
+			"description": "User-generated event with additional user-defined fields in the object.",
+			"properties": {
+				"eventname": {
+					"required": true,
+					"type": "string",
+					"description": "The name of the user event."
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel",
+					"description": "The channel that signaled the user event."
+				},
+				"userevent": {
+					"required": true,
+					"type": "object",
+					"description": "Custom Userevent data"
+				}
+			}
+		},
+		"ChannelHangupRequest": {
+			"id": "ChannelHangupRequest",
+			"extends": "Event",
+			"description": "A hangup was requested on the channel.",
+			"properties": {
+				"cause": {
+					"type": "int",
+					"description": "Integer representation of the cause of the hangup."
+				},
+				"soft": {
+					"type": "boolean",
+					"description": "Whether the hangup request was a soft hangup request."
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel",
+					"description": "The channel on which the hangup was requested."
+				}
+			}
+		},
+		"ChannelVarset": {
+			"id": "ChannelVarset",
+			"extends": "Event",
+			"description": "Channel variable changed.",
+			"properties": {
+				"variable": {
+					"required": true,
+					"type": "string",
+					"description": "The variable that changed."
+				},
+				"value": {
+					"required": true,
+					"type": "string",
+					"description": "The new value of the variable."
+				},
+				"channel": {
+					"required": false,
+					"type": "Channel",
+					"description": "The channel on which the variable was set.\n\nIf missing, the variable is a global variable."
+				}
+			}
+		},
+		"EndpointStateChange": {
+			"id": "EndpointStateChange",
+			"extends": "Event",
+			"description": "Endpoint state changed.",
+			"properties": {
+				"endpoint": {
+					"required": true,
+					"type": "Endpoint"
+				}
+			}
+		},
+		"StasisEnd": {
+			"id": "StasisEnd",
+			"extends": "Event",
+			"description": "Notification that a channel has left a Stasis appliction.",
+			"properties": {
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		},
+		"StasisStart": {
+			"id": "StasisStart",
+			"extends": "Event",
+			"description": "Notification that a channel has entered a Stasis appliction.",
+			"properties": {
+				"args": {
+					"required": true,
+					"type": "List[string]",
+					"description": "Arguments to the application"
+				},
+				"channel": {
+					"required": true,
+					"type": "Channel"
+				}
+			}
+		}
+	}
+}
