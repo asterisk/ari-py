@@ -42,6 +42,8 @@ class Client(object):
 
         self.event_listeners = {}
         self.global_listeners = []
+        self.exception_handler = \
+            lambda ex: log.exception("Event listener threw exception")
 
     def __getattr__(self, item):
         """Exposes repositories as fields of the client.
@@ -90,8 +92,8 @@ class Client(object):
                 # noinspection PyBroadException
                 try:
                     listener(msg_json)
-                except Exception:
-                    log.exception("Event listener threw exception")
+                except Exception as e:
+                    self.exception_handler(e)
 
     def on_event(self, event_type, event_cb):
         """Register callback for events with given type.

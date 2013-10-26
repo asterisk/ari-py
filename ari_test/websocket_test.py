@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""WebSocket testing.
+"""
+
 import unittest
 import ari
 import httpretty
@@ -15,6 +18,7 @@ POST = httpretty.POST
 DELETE = httpretty.DELETE
 
 
+# noinspection PyDocstring
 class WebSocketTest(AriTestCase):
     def setUp(self):
         super(WebSocketTest, self).setUp()
@@ -24,7 +28,7 @@ class WebSocketTest(AriTestCase):
         self.actual.append(event)
 
     def test_empty(self):
-        uut = connect(BASE_URL, 'test', [])
+        uut = connect(BASE_URL, [])
         uut.on_event('ev', self.record_event)
         uut.run('test')
         self.assertEqual([], self.actual)
@@ -37,7 +41,7 @@ class WebSocketTest(AriTestCase):
             '{"type": "not_ev", "data": 5}',
             '{"type": "ev", "data": 9}'
         ]
-        uut = connect(BASE_URL, 'test', messages)
+        uut = connect(BASE_URL, messages)
         uut.on_event("ev", self.record_event)
         uut.run('test')
         expected = [
@@ -48,11 +52,11 @@ class WebSocketTest(AriTestCase):
         self.assertEqual(expected, self.actual)
 
     def test_on_channel(self):
-        self.serve(DELETE, 'channel', 'test-channel')
+        self.serve(DELETE, 'channels', 'test-channel')
         messages = [
             '{ "type": "StasisStart", "channel": { "id": "test-channel" } }'
         ]
-        uut = connect(BASE_URL, 'test', messages)
+        uut = connect(BASE_URL, messages)
 
         def cb(channel, event):
             self.record_event(event)
@@ -75,7 +79,7 @@ class WebSocketTest(AriTestCase):
             '{"type": "ChannelStateChange", "channel": {"id": "test-channel"}}'
         ]
 
-        uut = connect(BASE_URL, 'test', messages)
+        uut = connect(BASE_URL, messages)
         channel = uut.channels.get(channelId='test-channel')
 
         def cb(channel, event):
@@ -91,7 +95,7 @@ class WebSocketTest(AriTestCase):
         self.assertEqual(expected, self.actual)
 
     def test_bad_event_type(self):
-        uut = connect(BASE_URL, 'test', [])
+        uut = connect(BASE_URL, [])
         try:
             uut.on_object_event(
                 'BadEventType', self.noop, self.noop, 'Channel')
@@ -100,30 +104,40 @@ class WebSocketTest(AriTestCase):
             pass
 
     def test_bad_object_type(self):
-        uut = connect(BASE_URL, 'test', [])
+        uut = connect(BASE_URL, [])
         try:
             uut.on_object_event('StasisStart', self.noop, self.noop, 'Bridge')
             self.fail("Event has no bridge")
         except ValueError:
             pass
 
+    # noinspection PyUnusedLocal
     def noop(self, *args, **kwargs):
         self.fail("Noop unexpectedly called")
 
 
 class WebSocketStubConnection(object):
+    """Stub WebSocket connection.
+
+    :param messages:
+    """
+
     def __init__(self, messages):
         self.messages = list(messages)
         self.messages.reverse()
 
     def recv(self):
+        """Fake receive method
+
+        :return: Next message, or None if no more messages.
+        """
         if self.messages:
             return str(self.messages.pop())
         return None
 
 
 class WebSocketStubClient(SynchronousHttpClient):
-    """Stub WebSocket connection.
+    """Stub WebSocket client.
 
     :param messages: List of messages to return.
     :type  messages: list
@@ -134,12 +148,38 @@ class WebSocketStubClient(SynchronousHttpClient):
         self.messages = messages
 
     def ws_connect(self, url, params=None):
+        """Fake connect method.
+
+        Returns a WebSocketStubConnection, which itself returns the series of
+        messages from WebSocketStubClient in its recv() method.
+
+        :param url: Ignored.
+        :param params: Ignored.
+        :return: Stub connection.
+        """
         return WebSocketStubConnection(self.messages)
 
 
-def connect(base_url, apps, messages):
+def raise_exceptions(ex):
+    """Testing exception handler for ARI client.
+
+    :param ex: Exception caught by the event loop.
+    """
+    raise
+
+
+def connect(base_url, messages):
+    """Connect, with a WebSocket client test double that merely retuns the
+     series of given messages.
+
+    :param base_url: Base URL for REST calls.
+    :param messages: Message strings to return from the WebSocket.
+    :return: ARI client with stubbed WebSocket.
+    """
     http_client = WebSocketStubClient(messages)
-    return ari.Client(base_url, http_client)
+    client = ari.Client(base_url, http_client)
+    client.exception_handler = raise_exceptions
+    return client
 
 
 if __name__ == '__main__':
