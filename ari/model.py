@@ -178,7 +178,7 @@ class BaseObject(object):
                 if self.id == objects.id:
                     fn(objects, event)
 
-        self.event_reg(event_type, fn_filter)
+        return self.event_reg(event_type, fn_filter)
 
 
 class Channel(BaseObject):

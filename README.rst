@@ -145,9 +145,6 @@ TODO
 ====
 
  * Create asynchronous bindings that can be used with Twisted, Tornado, etc.
- * Client needs a ``close`` method, which can properly close the HTTP client
-   and any current WebSocket connections.
- * Need a way to unregister an ``on_event`` callback.
 
 License
 -------

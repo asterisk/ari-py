@@ -40,8 +40,8 @@ class Client(object):
         else:
             self.event_models = {}
 
+        self.websockets = set()
         self.event_listeners = {}
-        self.global_listeners = []
         self.exception_handler = \
             lambda ex: log.exception("Event listener threw exception")
 
@@ -56,6 +56,16 @@ class Client(object):
                 "'%r' object has no attribute '%s'" % (self, item))
         return repo
 
+    def close(self):
+        """Close this ARI client.
+
+        This method will close any currently open WebSockets, and close the
+        underlying Swaggerclient.
+        """
+        for ws in self.websockets:
+            ws.send_close()
+        self.swagger.close()
+
     def get_repo(self, name):
         """Get a specific repo by name.
 
@@ -65,18 +75,12 @@ class Client(object):
         """
         return self.repositories.get(name)
 
-    def run(self, apps):
-        """Connect to the WebSocket and begin processing messages.
+    def __run(self, ws):
+        """Drains all messages from a WebSocket, sending them to the client's
+        listeners.
 
-        This method will block until all messages have been received from the
-        WebSocket.
-
-        :param apps: Application (or list of applications) to connect for
-        :type  apps: str or list of str
+        :param ws: WebSocket to drain.
         """
-        if isinstance(apps, list):
-            apps = ','.join(apps)
-        ws = self.swagger.events.eventWebsocket(app=apps)
         # TypeChecker false positive on iter(callable, sentinel) -> iterator
         # Fixed in plugin v3.0.1
         # noinspection PyTypeChecker
@@ -86,14 +90,32 @@ class Client(object):
                 log.error("Invalid event: %s" % msg_str)
                 continue
 
-            listeners = self.global_listeners + self.event_listeners.get(
-                msg_json['type'], [])
+            listeners = list(self.event_listeners.get(msg_json['type'], []))
             for listener in listeners:
                 # noinspection PyBroadException
                 try:
                     listener(msg_json)
                 except Exception as e:
                     self.exception_handler(e)
+
+    def run(self, apps):
+        """Connect to the WebSocket and begin processing messages.
+
+        This method will block until all messages have been received from the
+        WebSocket, or until this client has been closed.
+
+        :param apps: Application (or list of applications) to connect for
+        :type  apps: str or list of str
+        """
+        if isinstance(apps, list):
+            apps = ','.join(apps)
+        ws = self.swagger.events.eventWebsocket(app=apps)
+        self.websockets.add(ws)
+        try:
+            self.__run(ws)
+        finally:
+            ws.close()
+            self.websockets.remove(ws)
 
     def on_event(self, event_type, event_cb):
         """Register callback for events with given type.
@@ -102,11 +124,20 @@ class Client(object):
         :param event_cb: Callback function
         :type  event_cb: (dict) -> None
         """
-        listeners = self.event_listeners.get(event_type)
-        if listeners is None:
-            listeners = []
-            self.event_listeners[event_type] = listeners
-        listeners.append(event_cb)
+        listeners = self.event_listeners.setdefault(event_type, set())
+        listeners.add(event_cb)
+        client = self
+
+        class EventUnsubscriber(object):
+            """Class to allow events to be unsubscribed.
+            """
+
+            def close(self):
+                """Unsubscribe the associated event callback.
+                """
+                client.event_listeners[event_type].discard(event_cb)
+
+        return EventUnsubscriber()
 
     def on_object_event(self, event_type, event_cb, factory_fn, model_id):
         """Register callback for events with the given type. Event fields of
@@ -150,7 +181,7 @@ class Client(object):
                     obj = None
             event_cb(obj, event)
 
-        self.on_event(event_type, extract_objects)
+        return self.on_event(event_type, extract_objects)
 
     def on_channel_event(self, event_type, fn):
         """Register callback for Channel related events

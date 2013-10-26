@@ -51,6 +51,33 @@ class WebSocketTest(AriTestCase):
         ]
         self.assertEqual(expected, self.actual)
 
+    def test_unsubscribe(self):
+        messages = [
+            '{"type": "ev", "data": 1}',
+            '{"type": "ev", "data": 2}'
+        ]
+        uut = connect(BASE_URL, messages)
+        self.once_ran = 0
+
+        def only_once(event):
+            self.once_ran += 1
+            self.assertEqual(1, event['data'])
+            self.once.close()
+
+        def both_events(event):
+            self.record_event(event)
+
+        self.once = uut.on_event("ev", only_once)
+        self.both = uut.on_event("ev", both_events)
+        uut.run('test')
+
+        expected = [
+            {"type": "ev", "data": 1},
+            {"type": "ev", "data": 2}
+        ]
+        self.assertEqual(expected, self.actual)
+        self.assertEqual(1, self.once_ran)
+
     def test_on_channel(self):
         self.serve(DELETE, 'channels', 'test-channel')
         messages = [
@@ -67,6 +94,25 @@ class WebSocketTest(AriTestCase):
 
         expected = [
             {"type": "StasisStart", "channel": {"id": "test-channel"}}
+        ]
+        self.assertEqual(expected, self.actual)
+
+    def test_on_channel_unsubscribe(self):
+        messages = [
+            '{ "type": "StasisStart", "channel": { "id": "test-channel1" } }',
+            '{ "type": "StasisStart", "channel": { "id": "test-channel2" } }'
+        ]
+        uut = connect(BASE_URL, messages)
+
+        def only_once(channel, event):
+            self.record_event(event)
+            self.once.close()
+
+        self.once = uut.on_channel_event('StasisStart', only_once)
+        uut.run('test')
+
+        expected = [
+            {"type": "StasisStart", "channel": {"id": "test-channel1"}}
         ]
         self.assertEqual(expected, self.actual)
 
