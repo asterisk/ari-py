@@ -181,6 +181,16 @@ class WebSocketStubConnection(object):
             return str(self.messages.pop())
         return None
 
+    def send_close(self):
+        """Fake send_close method
+        """
+        return
+
+    def close(self):
+        """Fake close method
+        """
+        return
+
 
 class WebSocketStubClient(SynchronousHttpClient):
     """Stub WebSocket client.
