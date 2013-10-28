@@ -16,6 +16,7 @@ setup(
     long_description=open(os.path.join(os.path.dirname(__file__),
                                        "README.rst")).read(),
     author="Digium, Inc.",
+    author_email="dlee@digium.com",
     url="https://github.com/asterisk/asterisk_rest_libraries",
     packages=["ari"],
     classifiers=[

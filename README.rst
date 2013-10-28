@@ -124,8 +124,8 @@ To keep things isolated, I also recommend installing (and using)
 
     $ sudo pip install virtualenv
     $ mkdir -p ~/virtualenv
-    $ virtualenv ~/virtualenv/swagger
-    $ . ~/virtualenv/swagger/bin/activate
+    $ virtualenv ~/virtualenv/ari
+    $ . ~/virtualenv/ari/bin/activate
 
 `Setuptools <http://pypi.python.org/pypi/setuptools>`__ is used for
 building. `Nose <http://nose.readthedocs.org/en/latest/>`__ is used
