@@ -44,7 +44,7 @@ class ClientTest(AriTestCase):
                    body='{"id": "test-channel"}')
         self.serve(POST, 'channels', 'test-channel', 'play',
                    body='{"id": "test-playback"}')
-        self.serve(DELETE, 'playback', 'test-playback')
+        self.serve(DELETE, 'playbacks', 'test-playback')
 
         channel = self.uut.channels.get(channelId='test-channel')
         playback = channel.play(media='sound:test-sound')
