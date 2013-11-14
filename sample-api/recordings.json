@@ -1,7 +1,6 @@
 {
 	"_copyright": "Copyright (C) 2012 - 2013, Digium, Inc.",
 	"_author": "David M. Lee, II <dlee@digium.com>",
-	"_svn_revision": "$Revision: 401312 $",
 	"apiVersion": "0.0.0-test",
 	"swaggerVersion": "1.1",
 	"basePath": "http://ari.py/ari",
@@ -175,14 +174,9 @@
 							"reason": "Recording not in session"
 						}
 					]
-				}
-			]
-		},
-		{
-			"path": "/recordings/live/{recordingName}/unpause",
-			"operations": [
+				},
 				{
-					"httpMethod": "POST",
+					"httpMethod": "DELETE",
 					"summary": "Unpause a live recording.",
 					"nickname": "unpause",
 					"responseClass": "void",
@@ -238,14 +232,9 @@
 							"reason": "Recording not in session"
 						}
 					]
-				}
-			]
-		},
-		{
-			"path": "/recordings/live/{recordingName}/unmute",
-			"operations": [
+				},
 				{
-					"httpMethod": "POST",
+					"httpMethod": "DELETE",
 					"summary": "Unmute a live recording.",
 					"nickname": "unmute",
 					"responseClass": "void",
@@ -309,9 +298,11 @@
 						"valueType": "LIST",
 						"values": [
 							"queued",
-							"playing",
+							"recording",
 							"paused",
-							"done"
+							"done",
+							"failed",
+							"canceled"
 						]
 					}
 				},

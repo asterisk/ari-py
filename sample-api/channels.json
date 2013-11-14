@@ -1,7 +1,6 @@
 {
 	"_copyright": "Copyright (C) 2012 - 2013, Digium, Inc.",
 	"_author": "David M. Lee, II <dlee@digium.com>",
-	"_svn_revision": "$Revision: 401436 $",
 	"apiVersion": "0.0.0-test",
 	"swaggerVersion": "1.1",
 	"basePath": "http://ari.py/ari",
@@ -138,77 +137,33 @@
 							"required": true,
 							"allowMultiple": false,
 							"dataType": "string"
+						},
+						{
+							"name": "reason",
+							"description": "Reason for hanging up the channel",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "string",
+							"defalutValue": "normal",
+							"allowableValues": {
+								"valueType": "LIST",
+								"values": [
+									"normal",
+									"busy",
+									"congestion"
+								]
+							}
 						}
 					],
 					"errorResponses": [
 						{
-							"code": 404,
-							"reason": "Channel not found"
-						}
-					]
-				}
-			]
-		},
-		{
-			"path": "/channels/{channelId}/dial",
-			"description": "Create a new channel (originate) and bridge to this channel",
-			"operations": [
-				{
-					"httpMethod": "POST",
-					"summary": "Create a new channel (originate) and bridge to this channel.",
-					"nickname": "dial",
-					"responseClass": "Dialed",
-					"parameters": [
-						{
-							"name": "channelId",
-							"description": "Channel's id",
-							"paramType": "path",
-							"required": true,
-							"allowMultiple": false,
-							"dataType": "string"
+							"code": 400,
+							"reason": "Invalid reason for hangup provided"
 						},
-						{
-							"name": "endpoint",
-							"description": "Endpoint to call. If not specified, dial is routed via dialplan",
-							"paramType": "query",
-							"required": false,
-							"allowMultiple": false,
-							"dataType": "string"
-						},
-						{
-							"name": "extension",
-							"description": "Extension to dial",
-							"paramType": "query",
-							"required": false,
-							"allowMultiple": false,
-							"dataType": "string"
-						},
-						{
-							"name": "context",
-							"description": "When routing via dialplan, the context use. If omitted, uses 'default'",
-							"paramType": "query",
-							"required": false,
-							"allowMultiple": false,
-							"dataType": "string"
-						},
-						{
-							"name": "timeout",
-							"description": "Timeout (in seconds) before giving up dialing, or -1 for no timeout.",
-							"paramType": "query",
-							"required": false,
-							"allowMultiple": false,
-							"dataType": "int",
-							"defaultValue": 30
-						}
-					],
-					"errorResponses": [
 						{
 							"code": 404,
 							"reason": "Channel not found"
-						},
-						{
-							"code": 409,
-							"reason": "Channel not in a Stasis application"
 						}
 					]
 				}
@@ -290,6 +245,144 @@
 						}
 					],
 					"errorResponses": [
+						{
+							"code": 404,
+							"reason": "Channel not found"
+						},
+						{
+							"code": 409,
+							"reason": "Channel not in a Stasis application"
+						}
+					]
+				}
+			]
+		},
+		{
+			"path": "/channels/{channelId}/ring",
+			"description": "Send a ringing indication to a channel",
+			"operations": [
+				{
+					"httpMethod": "POST",
+					"summary": "Indicate ringing to a channel.",
+					"nickname": "ring",
+					"responseClass": "void",
+					"parameters": [
+						{
+							"name": "channelId",
+							"description": "Channel's id",
+							"paramType": "path",
+							"required": true,
+							"allowMultiple": false,
+							"dataType": "string"
+						}
+					],
+					"errorResponses": [
+						{
+							"code": 404,
+							"reason": "Channel not found"
+						},
+						{
+							"code": 409,
+							"reason": "Channel not in a Stasis application"
+						}
+					]
+				},
+				{
+					"httpMethod": "DELETE",
+					"summary": "Stop ringing indication on a channel if locally generated.",
+					"nickname": "ringStop",
+					"responseClass": "void",
+					"parameters": [
+						{
+							"name": "channelId",
+							"description": "Channel's id",
+							"paramType": "path",
+							"required": true,
+							"allowMultiple": false,
+							"dataType": "string"
+						}
+					],
+					"errorResponses": [
+						{
+							"code": 404,
+							"reason": "Channel not found"
+						},
+						{
+							"code": 409,
+							"reason": "Channel not in a Stasis application"
+						}
+					]
+				}
+			]
+		},
+		{
+			"path": "/channels/{channelId}/dtmf",
+			"description": "Send DTMF to a channel",
+			"operations": [
+				{
+					"httpMethod": "POST",
+					"summary": "Send provided DTMF to a given channel.",
+					"nickname": "sendDTMF",
+					"responseClass": "void",
+					"parameters": [
+						{
+							"name": "channelId",
+							"description": "Channel's id",
+							"paramType": "path",
+							"required": true,
+							"allowMultiple": false,
+							"dataType": "string"
+						},
+						{
+							"name": "dtmf",
+							"description": "DTMF To send.",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "string"
+						},
+						{
+							"name": "before",
+							"description": "Amount of time to wait before DTMF digits (specified in milliseconds) start.",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "int",
+							"defaultValue": 0
+						},
+						{
+							"name": "between",
+							"description": "Amount of time in between DTMF digits (specified in milliseconds).",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "int",
+							"defaultValue": 100
+						},
+						{
+							"name": "duration",
+							"description": "Length of each DTMF digit (specified in milliseconds).",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "int",
+							"defaultValue": 100
+						},
+						{
+							"name": "after",
+							"description": "Amount of time to wait after DTMF digits (specified in milliseconds) end.",
+							"paramType": "query",
+							"required": false,
+							"allowMultiple": false,
+							"dataType": "int",
+							"defaultValue": 0
+						}
+					],
+					"errorResponses": [
+						{
+							"code": 400,
+							"reason": "DTMF is required"
+						},
 						{
 							"code": 404,
 							"reason": "Channel not found"
@@ -702,7 +795,11 @@
 						},
 						{
 							"code": 409,
-							"reason": "Channel is not in a Stasis application; the channel is currently bridged with other channels; A recording with the same name is currently in progress."
+							"reason": "Channel is not in a Stasis application; the channel is currently bridged with other hcannels; A recording with the same name already exists on the system and can not be overwritten because it is in progress or ifExists=fail"
+						},
+						{
+							"code": 422,
+							"reason": "The format specified is unknown on this system"
 						}
 					]
 				}

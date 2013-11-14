@@ -105,6 +105,24 @@ class ClientTest(AriTestCase):
         self.assertEqual('TEST', endpoint.json['technology'])
         self.assertEqual('1234', endpoint.json['resource'])
 
+    def test_live_recording(self):
+        self.serve(GET, 'recordings', 'live', 'test-recording',
+                   body='{"name": "test-recording"}')
+        self.serve(DELETE, 'recordings', 'live', 'test-recording', status=204)
+
+        recording = self.uut.recordings.getLive(recordingName='test-recording')
+        recording.cancel()
+
+    def test_stored_recording(self):
+        self.serve(GET, 'recordings', 'stored', 'test-recording',
+                   body='{"name": "test-recording"}')
+        self.serve(DELETE, 'recordings', 'stored', 'test-recording',
+                   status=204)
+
+        recording = self.uut.recordings.getStored(
+            recordingName='test-recording')
+        recording.deleteStored()
+
     def setUp(self):
         super(ClientTest, self).setUp()
         self.uut = ari.connect('http://ari.py/', 'test', 'test')

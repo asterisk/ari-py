@@ -228,6 +228,36 @@ class Playback(BaseObject):
             client.on_playback_event)
 
 
+class LiveRecording(BaseObject):
+    """First class object API.
+
+    :param client: ARI client
+    :type  client: client.Client
+    :param recording_json: Instance data
+    """
+    id_generator = DefaultObjectIdGenerator('recordingName', id_field='name')
+
+    def __init__(self, client, recording_json):
+        super(LiveRecording, self).__init__(
+            client, client.swagger.recordings, recording_json,
+            client.on_live_recording_event)
+
+
+class StoredRecording(BaseObject):
+    """First class object API.
+
+    :param client: ARI client
+    :type  client: client.Client
+    :param recording_json: Instance data
+    """
+    id_generator = DefaultObjectIdGenerator('recordingName', id_field='name')
+
+    def __init__(self, client, recording_json):
+        super(StoredRecording, self).__init__(
+            client, client.swagger.recordings, recording_json,
+            client.on_stored_recording_event)
+
+
 # noinspection PyDocstring
 class EndpointIdGenerator(ObjectIdGenerator):
     """Id generator for endpoints, because they are weird.
@@ -309,5 +339,7 @@ CLASS_MAP = {
     'Bridge': Bridge,
     'Channel': Channel,
     'Endpoint': Endpoint,
-    'Playback': Playback
+    'Playback': Playback,
+    'LiveRecording': LiveRecording,
+    'StoredRecording': StoredRecording
 }

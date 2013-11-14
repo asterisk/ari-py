@@ -1,7 +1,6 @@
 {
 	"_copyright": "Copyright (C) 2012 - 2013, Digium, Inc.",
 	"_author": "David M. Lee, II <dlee@digium.com>",
-	"_svn_revision": "$Revision: 401312 $",
 	"apiVersion": "0.0.0-test",
 	"swaggerVersion": "1.1",
 	"basePath": "http://ari.py/ari",

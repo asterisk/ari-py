@@ -210,6 +210,24 @@ class Client(object):
         """
         return self.on_object_event(event_type, fn, Playback, 'Playback')
 
+    def on_live_recording_event(self, event_type, fn):
+        """Register callback for LiveRecording related events
+
+        :param event_type: String name of the event to register for.
+        :param fn: Callback function
+        :type  fn: (LiveRecording, dict) -> None or (list[LiveRecording], dict) -> None
+        """
+        return self.on_object_event(event_type, fn, LiveRecording, 'LiveRecording')
+
+    def on_stored_recording_event(self, event_type, fn):
+        """Register callback for StoredRecording related events
+
+        :param event_type: String name of the event to register for.
+        :param fn: Callback function
+        :type  fn: (StoredRecording, dict) -> None or (list[StoredRecording], dict) -> None
+        """
+        return self.on_object_event(event_type, fn, StoredRecording, 'StoredRecording')
+
     def on_endpoint_event(self, event_type, fn):
         """Register callback for Endpoint related events
 
