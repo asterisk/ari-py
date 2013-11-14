@@ -224,7 +224,7 @@ class Playback(BaseObject):
 
     def __init__(self, client, playback_json):
         super(Playback, self).__init__(
-            client, client.swagger.playback, playback_json,
+            client, client.swagger.playbacks, playback_json,
             client.on_playback_event)
 
 
