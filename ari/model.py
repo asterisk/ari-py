@@ -178,6 +178,10 @@ class BaseObject(object):
                 if self.id == objects.id:
                     fn(objects, event)
 
+        if not self.event_reg:
+            msg = "Event callback registration called on object with no events"
+            raise RuntimeError(msg)
+
         return self.event_reg(event_type, fn_filter)
 
 
@@ -303,6 +307,21 @@ class Sound(BaseObject):
             client, client.swagger.sounds, sound_json, client.on_sound_event)
 
 
+class Mailbox(BaseObject):
+    """First class object API.
+
+    :param client:       ARI client.
+    :type  client:       client.Client
+    :param mailbox_json: Instance data
+    """
+
+    id_generator = DefaultObjectIdGenerator('mailboxName', id_field='name')
+
+    def __init__(self, client, mailbox_json):
+        super(Mailbox, self).__init__(
+            client, client.swagger.mailboxes, mailbox_json, None)
+
+
 def promote(client, resp, operation_json):
     """Promote a response from the request's HTTP response to a first class
      object.
@@ -341,5 +360,6 @@ CLASS_MAP = {
     'Endpoint': Endpoint,
     'Playback': Playback,
     'LiveRecording': LiveRecording,
-    'StoredRecording': StoredRecording
+    'StoredRecording': StoredRecording,
+    'Mailbox': Mailbox
 }

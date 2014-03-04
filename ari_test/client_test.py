@@ -123,6 +123,18 @@ class ClientTest(AriTestCase):
             recordingName='test-recording')
         recording.deleteStored()
 
+    def test_mailboxes(self):
+        self.serve(PUT, 'mailboxes', '1000',
+                   body='{"name": "1000", "old_messages": "1", "new_messages": "3"}')
+
+        mailbox = self.uut.mailboxes.update(
+            mailboxName='1000',
+            oldMessages='1',
+            newMessages='3')
+        self.assertEqual('1000', mailbox['name'])
+        self.assertEqual('1', mailbox['old_messages'])
+        self.assertEqual('3', mailbox['new_messages'])
+
     def setUp(self):
         super(ClientTest, self).setUp()
         self.uut = ari.connect('http://ari.py/', 'test', 'test')

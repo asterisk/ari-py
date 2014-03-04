@@ -30,6 +30,10 @@
 			"description": "Sound resources"
 		},
 		{
+			"path": "/api-docs/mailboxes.{format}",
+			"description": "Mailbox (MWI) resources"
+		},
+		{
 			"path": "/api-docs/playbacks.{format}",
 			"description": "Playback control resources"
 		},
