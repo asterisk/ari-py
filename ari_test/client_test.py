@@ -135,6 +135,15 @@ class ClientTest(AriTestCase):
         self.assertEqual('1', mailbox['old_messages'])
         self.assertEqual('3', mailbox['new_messages'])
 
+    def test_device_state(self):
+        self.serve(PUT, 'deviceStates', 'foobar',
+                   body='{"name": "foobar", "state": "BUSY"}')
+        device_state = self.uut.deviceStates.update(
+            deviceName='foobar',
+            deviceState='BUSY')
+        self.assertEqual('foobar', device_state['name'])
+        self.assertEqual('BUSY', device_state['state'])
+
     def setUp(self):
         super(ClientTest, self).setUp()
         self.uut = ari.connect('http://ari.py/', 'test', 'test')

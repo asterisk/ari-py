@@ -292,6 +292,21 @@ class Endpoint(BaseObject):
             client.on_endpoint_event)
 
 
+class DeviceState(BaseObject):
+    """First class object API.
+
+    :param client:  ARI client.
+    :type  client:  client.Client
+    :param endpoint_json: Instance data
+    """
+    id_generator = DefaultObjectIdGenerator('deviceName', id_field='name')
+
+    def __init__(self, client, device_state_json):
+        super(DeviceState, self).__init__(
+            client, client.swagger.devicestates, device_state_json,
+            client.on_device_state_event)
+
+
 class Sound(BaseObject):
     """First class object API.
 
@@ -361,5 +376,6 @@ CLASS_MAP = {
     'Playback': Playback,
     'LiveRecording': LiveRecording,
     'StoredRecording': StoredRecording,
-    'Mailbox': Mailbox
+    'Mailbox': Mailbox,
+    'DeviceState': DeviceState,
 }
