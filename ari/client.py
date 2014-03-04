@@ -237,6 +237,15 @@ class Client(object):
         """
         return self.on_object_event(event_type, fn, Endpoint, 'Endpoint')
 
+    def on_device_state_event(self, event_type, fn):
+        """Register callback for DeviceState related events
+
+        :param event_type: String name of the event to register for.
+        :param fn: Callback function
+        :type  fn: (DeviceState, dict) -> None or (list[DeviceState], dict) -> None
+        """
+        return self.on_object_event(event_type, fn, DeviceState, 'DeviceState')
+
     def on_sound_event(self, event_type, fn):
         """Register callback for Sound related events
 
