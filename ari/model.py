@@ -303,7 +303,7 @@ class DeviceState(BaseObject):
 
     def __init__(self, client, device_state_json):
         super(DeviceState, self).__init__(
-            client, client.swagger.devicestates, device_state_json,
+            client, client.swagger.deviceStates, device_state_json,
             client.on_device_state_event)
 
 
