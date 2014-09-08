@@ -140,6 +140,39 @@ class WebSocketTest(AriTestCase):
         ]
         self.assertEqual(expected, self.actual)
 
+    def test_arbitrary_callback_arguments(self):
+        self.serve(GET, 'channels', 'test-channel',
+                   body='{"id": "test-channel"}')
+        self.serve(DELETE, 'channels', 'test-channel')
+        messages = [
+            '{"type": "ChannelDtmfReceived", "channel": {"id": "test-channel"}}'
+        ]
+        obj = {'key': 'val'}
+
+        uut = connect(BASE_URL, messages)
+        channel = uut.channels.get(channelId='test-channel')
+
+        def cb(channel, event, arg):
+            if arg == 'done':
+                channel.hangup()
+            else:
+                self.record_event(arg)
+
+        def cb2(channel, event, arg1, arg2=None, arg3=None):
+            self.record_event(arg1)
+            self.record_event(arg2)
+            self.record_event(arg3)
+
+        channel.on_event('ChannelDtmfReceived', cb, 1)
+        channel.on_event('ChannelDtmfReceived', cb, arg=2)
+        channel.on_event('ChannelDtmfReceived', cb, obj)
+        channel.on_event('ChannelDtmfReceived', cb2, 2.0, arg3=[1, 2, 3])
+        channel.on_event('ChannelDtmfReceived', cb, 'done')
+        uut.run('test')
+
+        expected = [1, 2, obj, 2.0, None, [1, 2, 3]]
+        self.assertEqual(expected, self.actual)
+
     def test_bad_event_type(self):
         uut = connect(BASE_URL, [])
         try:

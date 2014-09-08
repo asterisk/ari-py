@@ -156,33 +156,35 @@ class BaseObject(object):
 
         return enrich_operation
 
-    def on_event(self, event_type, fn):
+    def on_event(self, event_type, fn, *args, **kwargs):
         """Register event callbacks for this specific domain object.
 
         :param event_type: Type of event to register for.
         :type  event_type: str
         :param fn:  Callback function for events.
         :type  fn:  (object, dict) -> None
+        :param args: Arguments to pass to fn
+        :param kwargs: Keyword arguments to pass to fn
         """
 
-        def fn_filter(objects, event):
-            """Filter recieved events for this object.
+        def fn_filter(objects, event, *args, **kwargs):
+            """Filter received events for this object.
 
             :param objects: Objects found in this event.
             :param event: Event.
             """
             if isinstance(objects, dict):
                 if self.id in [c.id for c in objects.values()]:
-                    fn(objects, event)
+                    fn(objects, event, *args, **kwargs)
             else:
                 if self.id == objects.id:
-                    fn(objects, event)
+                    fn(objects, event, *args, **kwargs)
 
         if not self.event_reg:
             msg = "Event callback registration called on object with no events"
             raise RuntimeError(msg)
 
-        return self.event_reg(event_type, fn_filter)
+        return self.event_reg(event_type, fn_filter, *args, **kwargs)
 
 
 class Channel(BaseObject):
