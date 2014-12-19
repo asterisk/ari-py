@@ -145,11 +145,12 @@ TODO
 ====
 
  * Create asynchronous bindings that can be used with Twisted, Tornado, etc.
+ * Add support for Python 3
 
 License
 -------
 
-Copyright (c) 2013, Digium, Inc. All rights reserved.
+Copyright (c) 2013-2014, Digium, Inc. All rights reserved.
 
 Swagger.py is licensed with a `BSD 3-Clause
 License <http://opensource.org/licenses/BSD-3-Clause>`__.
