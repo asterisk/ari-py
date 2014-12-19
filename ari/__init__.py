@@ -5,7 +5,7 @@
 """ARI client library
 """
 
-import client
+import ari.client
 import swaggerpy.http_client
 import urlparse
 
